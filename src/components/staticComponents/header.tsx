@@ -55,7 +55,7 @@ const Header: React.FC = () => {
         </div>
         <div className="items-center flex-shrink-0">
           <button className="px-8 py-3 font-semibold rounded bg-blue-600 text-gray-50 dark:bg-violet-600 dark:text-gray-50 hover:bg-blue-700 dark:hover:bg-violet-700">
-            Log in
+            Logout
           </button>
         </div>
       </div>
