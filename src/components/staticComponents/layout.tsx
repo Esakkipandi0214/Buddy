@@ -7,7 +7,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className=" grid h-screen">
+    <div className=" grid h-screen p-1">
         <Header/>
       <div className="flex-1 p-6 bg-gray-100">
         {children}
