@@ -6,13 +6,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
-import { signInWithEmailAndPassword } from 'firebase/auth'
-import { auth } from '../firebase'  // Adjust the path to your firebaseConfig file
+import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { auth, db } from '../../firebase'  // Adjust the path to your firebaseConfig file
 import { useRouter } from 'next/router'  // Import useRouter from next/router
-import { collection, query, where, getDocs } from 'firebase/firestore'
-import { db } from '../firebase'  // Adjust the path to your firebaseConfig file
+import { doc, setDoc } from 'firebase/firestore'
 
 export default function Component() {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -22,7 +22,7 @@ export default function Component() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email || !password) {
+    if (!name || !email || !password) {
       setError('Please fill in all fields')
       return
     }
@@ -35,34 +35,28 @@ export default function Component() {
       return
     }
     try {
-      // Sign in with email and password
-      await signInWithEmailAndPassword(auth, email, password)
-      // const user = userCredential.user
+      // Create a new user with Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      const user = userCredential.user
 
-      // Query the Firestore users collection to get the UID
-      const q = query(collection(db, 'users'), where('email', '==', email))
-      const querySnapshot = await getDocs(q)
-
-      if (!querySnapshot.empty) {
-        const doc = querySnapshot.docs[0]
-        const userData = doc.data()
-        // Store the UID in local storage
-        localStorage.setItem('userUid', userData.uid)
-      } else {
-        setError('User not found in database.')
-        return
-      }
+      // Store user information in Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        name: name,
+        email: email,
+        uid: user.uid
+      })
 
       setError('')
-      setSuccess('Login successful')
-      console.log('Login successful')
+      setSuccess('Account created successfully')
+      console.log('Account created successfully')
+
       setTimeout(() => {
-        router.push('/scheduler')  // Redirect to the scheduler page
+        router.push('/')  // Redirect to the scheduler page
       }, 1000)  // Optional delay for success message visibility
     } catch (error) {
       setSuccess('')
-      setError('Failed to login. Please check your credentials.')
-      console.error('Login error:', error)
+      setError('Failed to create an account. Please check your credentials.')
+      console.error('Registration error:', error)
     }
   }
 
@@ -70,13 +64,25 @@ export default function Component() {
     <div className="min-h-screen px-4 sm:px-0 flex items-center justify-center bg-gradient-to-br from-purple-400 via-pink-500 to-red-500">
       <Card className="w-full max-w-md mx-auto backdrop-blur-sm bg-white/30 shadow-xl">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center text-white">Login</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center text-white">Create Account</CardTitle>
           <CardDescription className="text-center text-gray-200">
-            Enter your credentials to access your account
+            Enter your details to create a new account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-white">Name</Label>
+              <Input 
+                id="name" 
+                type="text" 
+                placeholder="John Doe" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="bg-white/50 placeholder:text-gray-500"
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-white">Email</Label>
               <Input 
@@ -119,15 +125,15 @@ export default function Component() {
             {error && <p className="text-sm text-yellow-300 bg-red-500/50 p-2 rounded">{error}</p>}
             {success && <p className="text-sm text-green-300 bg-green-500/50 p-2 rounded">{success}</p>}
             <Button type="submit" className="w-full bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold py-2 px-4 rounded transition-all duration-200">
-              Login
+              Create Account
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-200">
-            Don&apos;t have an account?{" "}
+            Already have an account?{" "}
             <a href="#" className="text-yellow-300 hover:underline font-semibold">
-              Sign up
+              Login
             </a>
           </p>
         </CardFooter>
