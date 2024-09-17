@@ -18,10 +18,17 @@ type MonthlyCalendarProps = {
 const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ tasks, currentDate, onDateChange }) => {
   const [currentMonth, setCurrentMonth] = React.useState(new Date(currentDate));
 
+  // Debugging: Log current tasks and date
   console.log("Tasks:", tasks);
+  console.log("Current Date:", currentDate);
+  console.log("Current Month:", currentMonth);
 
   const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+
+  // Debugging: Log days in month and first day of month
+  console.log("Days in Month:", daysInMonth);
+  console.log("First Day of Month:", firstDayOfMonth);
 
   const navigateMonth = (direction: 'prev' | 'next') => {
     const newMonth = new Date(currentMonth);
@@ -37,28 +44,37 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ tasks, currentDate, o
   const renderCalendarDays = () => {
     const days = [];
     const totalSlots = Math.ceil((daysInMonth + firstDayOfMonth) / 7) * 7;
-
+  
     for (let i = 0; i < totalSlots; i++) {
-      const dayNumber = i - firstDayOfMonth + 1;
-      const isCurrentMonth = dayNumber > 0 && dayNumber <= daysInMonth;
-      const date = isCurrentMonth ? new Date(currentMonth.getFullYear(), currentMonth.getMonth(), dayNumber).toISOString().split('T')[0] : '';
-      const dayTasks = tasks.filter(task => task.date === date);
-
+      const dayOffset = i - firstDayOfMonth + 1;
+      const isCurrentMonth = dayOffset > 0 && dayOffset <= daysInMonth;
+      const date = isCurrentMonth ? new Date(currentMonth.getFullYear(), currentMonth.getMonth(), dayOffset) : null;
+  
+      // Use local date formatting to avoid time zone issues
+      const formattedDate = date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : '';
+  
+      // Debugging: Log for verification
+      console.log("Day Offset:", dayOffset, "Date:", date, "Formatted Date:", formattedDate);
+  
+      // Filter tasks for the current date
+      const dayTasks = tasks.filter(task => task.date === formattedDate);
+  
       days.push(
         <div
           key={i}
           className={`p-2 border ${isCurrentMonth ? 'bg-white' : 'bg-gray-100'} ${
-            dayNumber === currentDate.getDate() &&
+            isCurrentMonth &&
+            dayOffset === currentDate.getDate() &&
             currentMonth.getMonth() === currentDate.getMonth() &&
             currentMonth.getFullYear() === currentDate.getFullYear()
               ? 'bg-blue-100'
               : ''
           } cursor-pointer`}
-          onClick={() => isCurrentMonth && handleDateClick(dayNumber)}
+          onClick={() => isCurrentMonth && handleDateClick(dayOffset)}
         >
           {isCurrentMonth && (
             <>
-              <div className="font-bold">{dayNumber}</div>
+              <div className="font-bold">{dayOffset}</div>
               {dayTasks.length > 0 && (
                 <div className="text-xs truncate">
                   {dayTasks.map(task => (
@@ -71,9 +87,11 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ tasks, currentDate, o
         </div>
       );
     }
-
+  
     return days;
   };
+          
+  
 
   return (
     <Card className="w-full">
