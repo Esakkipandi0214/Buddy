@@ -27,11 +27,20 @@ export default function FilesPage() {
   const [error, setError] = useState<string | null>(null)
   const [fileType, setFileType] = useState('') // New state for file type
 
-  useEffect(() => {
-    fetchFiles(searchQuery)
-  }, [searchQuery]) // Fetch files whenever searchQuery changes
+  // Accepted file types (PDF, Word, Excel)
+  const acceptedFileTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
 
-  async function fetchFiles(queryText?: string) {
+  useEffect(() => {
+    fetchFiles()
+  }, []) // Fetch files on mount
+
+  useEffect(() => {
+    if (files.length > 0) {
+      applySearchFilter()
+    }
+  }, [searchQuery]) // Apply search filter whenever searchQuery changes
+
+  async function fetchFiles() {
     const userUid = localStorage.getItem('userUid')
     if (!userUid) {
       setError('User ID not found.')
@@ -42,22 +51,35 @@ export default function FilesPage() {
     setError(null)
     try {
       const filesCollection = collection(db, 'userFiles')
-      const q = queryText
-        ? query(filesCollection, where('originalName', '>=', queryText), where('originalName', '<=', queryText + '\uf8ff'))
-        : filesCollection
-
+      
+      // Fetch all files for the user (without file name filter)
+      const q = query(filesCollection, where('userId', '==', userUid))
       const querySnapshot = await getDocs(q)
       const filesData: File[] = querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
         ...(doc.data() as File),
         uploadedAt: new Date((doc.data() as File).uploadedAt).toLocaleString(),
       }))
-      setFiles(filesData)
+
+      setFiles(filesData) // Set files after fetching
     } catch (err) {
       setError('Failed to fetch files. Please try again.')
       console.error('Error fetching files:', err)
     } finally {
       setSearching(false)
     }
+  }
+
+  function applySearchFilter() {
+    if (!searchQuery) {
+      // If no search query, reset to all files
+      fetchFiles()
+      return
+    }
+
+    const filteredFiles = files.filter(file =>
+      file.originalName.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    setFiles(filteredFiles)
   }
 
   async function handleUpload(event: React.FormEvent<HTMLFormElement>) {
@@ -71,6 +93,13 @@ export default function FilesPage() {
 
     if (!file) {
       setError('Please select a file to upload.')
+      setUploading(false)
+      return
+    }
+
+    // Validate file type
+    if (!acceptedFileTypes.includes(file.type)) {
+      setError('Invalid file type. Please upload a PDF, Word, or Excel file.')
       setUploading(false)
       return
     }
@@ -97,7 +126,7 @@ export default function FilesPage() {
 
       await addDoc(collection(db, 'userFiles'), fileMetadata)
 
-      await fetchFiles(searchQuery) // Fetch files with the current search query
+      await fetchFiles() // Fetch files after upload
       form.reset()
       setFileType('') // Reset file type state after upload
     } catch (err) {
@@ -110,93 +139,96 @@ export default function FilesPage() {
 
   return (
     <Layout>
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">File Upload and Search</h1>
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">File Upload and Search</h1>
 
-      <form onSubmit={handleUpload} className="mb-4 space-y-4">
-        <div>
-          <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 mb-2">
-            Choose a file to upload
+        <form onSubmit={handleUpload} className="mb-4 space-y-4">
+          <div>
+            <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 mb-2">
+              Choose a file to upload (PDF, Word, Excel)
+            </label>
+            <input
+              id="file-upload"
+              name="file"
+              type="file"
+              accept=".pdf,.doc,.docx,.xls,.xlsx" // Restrict file types
+              required
+              className="border p-2 w-full sm:w-auto"
+              aria-label="File to upload"
+            />
+          </div>
+          <div>
+            <label htmlFor="file-type" className="block text-sm font-medium text-gray-700 mb-2">
+              File Type
+            </label>
+            <input
+              id="file-type"
+              type="text"
+              value={fileType}
+              onChange={(e) => setFileType(e.target.value)}
+              placeholder="Enter file type..."
+              className="border p-2 w-full sm:w-auto"
+              aria-label="File type"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={uploading}
+            className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-blue-300 w-full sm:w-auto"
+            aria-busy={uploading}
+          >
+            {uploading ? 'Uploading...' : 'Upload'}
+          </button>
+        </form>
+
+        <div className="mb-4">
+          <label htmlFor="file-search" className="block text-sm font-medium text-gray-700 mb-2">
+            Search files
           </label>
           <input
-            id="file-upload"
-            name="file"
-            type="file"
-            required
-            className="border p-2 w-full sm:w-auto"
-            aria-label="File to upload"
-          />
-        </div>
-        <div>
-          <label htmlFor="file-type" className="block text-sm font-medium text-gray-700 mb-2">
-            File Type
-          </label>
-          <input
-            id="file-type"
+            id="file-search"
             type="text"
-            value={fileType}
-            onChange={(e) => setFileType(e.target.value)}
-            placeholder="Enter file type..."
-            className="border p-2 w-full sm:w-auto"
-            aria-label="File type"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Enter file name..."
+            className="border p-2 w-full"
+            aria-label="Search query for files"
           />
         </div>
-        <button
-          type="submit"
-          disabled={uploading}
-          className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-blue-300 w-full sm:w-auto"
-          aria-busy={uploading}
-        >
-          {uploading ? 'Uploading...' : 'Upload'}
-        </button>
-      </form>
 
-      <div className="mb-4">
-        <label htmlFor="file-search" className="block text-sm font-medium text-gray-700 mb-2">
-          Search files
-        </label>
-        <input
-          id="file-search"
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Enter file name..."
-          className="border p-2 w-full"
-          aria-label="Search query for files"
-        />
-      </div>
-
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
-          <p>{error}</p>
-        </div>
-      )}
-
-      <ul className="space-y-2" aria-live="polite">
-        {files.map((file) => (
-          <li key={file.url} className="border p-2 rounded flex flex-col sm:flex-row items-center justify-between">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center">
-              <p className="text-blue-500">
-                {file.originalName}
-              </p>
-              <p className="text-sm text-gray-500 mt-2 sm:mt-0 sm:ml-4">
-                Size: {(file.size / 1024).toFixed(2)} KB | Uploaded: {file.uploadedAt} | Type: {file.fileType}
-              </p>
-            </div>
-            <a
-              href={file.url}
-              download
-              className="bg-blue-500 text-white px-4 py-2 rounded mt-2 sm:mt-0 hover:bg-blue-700"
-            >
-              Download
-            </a>
-          </li>
-        ))}
-        {files.length === 0 && !searching && (
-          <li>No files found.</li>
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+            <p>{error}</p>
+          </div>
         )}
-      </ul>
-    </div>
+
+        <ul className="space-y-2" aria-live="polite">
+          {files.map((file) => (
+            <li key={file.url} className="border p-2 rounded flex flex-col sm:flex-row items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center">
+                <p className="text-blue-500">
+                  {file.originalName}
+                </p>
+                <p className="text-sm text-gray-500 mt-2 sm:mt-0 sm:ml-4">
+                  Size: {(file.size / 1024).toFixed(2)} KB | Uploaded: {file.uploadedAt} | Type: {file.fileType}
+                </p>
+              </div>
+              <a
+  href={file.url}
+  target="_blank" // This opens the link in a new tab
+  rel="noopener noreferrer" // This prevents potential security risks
+  className="bg-blue-500 text-white px-4 py-2 rounded mt-2 sm:mt-0 hover:bg-blue-700"
+>
+  Download
+</a>
+
+            </li>
+          ))}
+          {files.length === 0 && !searching && (
+            <li>No files found.</li>
+          )}
+        </ul>
+      </div>
     </Layout>
   )
 }

@@ -9,7 +9,8 @@ import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { auth, db } from '../../firebase'  // Adjust the path to your firebaseConfig file
 import { useRouter } from 'next/router'  // Import useRouter from next/router
-import { doc, setDoc } from 'firebase/firestore'
+import { doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore'
+import Link from 'next/link'
 
 export default function Component() {
   const [name, setName] = useState('')
@@ -22,6 +23,9 @@ export default function Component() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')  // Clear previous errors
+    setSuccess('')  // Clear previous success message
+    
     if (!name || !email || !password) {
       setError('Please fill in all fields')
       return
@@ -34,8 +38,19 @@ export default function Component() {
       setError('Password must be at least 6 characters long')
       return
     }
+
     try {
-      // Create a new user with Firebase Authentication
+      // Check if email already exists in Firestore
+      const usersRef = collection(db, 'users')
+      const emailQuery = query(usersRef, where('email', '==', email))
+      const querySnapshot = await getDocs(emailQuery)
+
+      if (!querySnapshot.empty) {
+        setError('Email is already registered. Please use a different email or login.')
+        return
+      }
+
+      // Create a new user with Firebase Authentication if email is not registered
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       const user = userCredential.user
 
@@ -53,6 +68,7 @@ export default function Component() {
       setTimeout(() => {
         router.push('/')  // Redirect to the scheduler page
       }, 1000)  // Optional delay for success message visibility
+
     } catch (error) {
       setSuccess('')
       setError('Failed to create an account. Please check your credentials.')
@@ -132,9 +148,9 @@ export default function Component() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-200">
             Already have an account?{" "}
-            <a href="#" className="text-yellow-300 hover:underline font-semibold">
+            <Link href="/" className="text-yellow-300 hover:underline font-semibold">
               Login
-            </a>
+            </Link>
           </p>
         </CardFooter>
       </Card>

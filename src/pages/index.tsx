@@ -11,6 +11,7 @@ import { auth } from '../firebase'  // Adjust the path to your firebaseConfig fi
 import { useRouter } from 'next/router'  // Import useRouter from next/router
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'  // Adjust the path to your firebaseConfig file
+import Link from 'next/link'
 
 export default function Component() {
   const [email, setEmail] = useState('')
@@ -126,9 +127,9 @@ export default function Component() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-200">
             Don&apos;t have an account?{" "}
-            <a href="#" className="text-yellow-300 hover:underline font-semibold">
+            <Link href="/registration" className="text-yellow-300 hover:underline font-semibold">
               Sign up
-            </a>
+            </Link>
           </p>
         </CardFooter>
       </Card>

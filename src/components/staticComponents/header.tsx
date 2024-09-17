@@ -1,14 +1,25 @@
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router'; // Import useRouter
 
 const Header: React.FC = () => {
+  const router = useRouter(); // Initialize useRouter
+
+  const handleLogout = () => {
+    // Remove userUid from localStorage
+    localStorage.removeItem('userUid');
+    
+    // Redirect to the home page
+    router.push('/');
+  };
+
   return (
     <header className="p-4 dark:bg-gray-100 dark:text-gray-800">
       <div className="container flex justify-between h-16 mx-auto">
         <div className="flex items-center">
           <a 
             rel="noopener noreferrer" 
-            href="#" 
+            href="/dashboardUser" 
             aria-label="Back to homepage" 
             className="flex items-center p-2"
           >
@@ -27,7 +38,7 @@ const Header: React.FC = () => {
             <li className="flex">
               <Link 
                 rel="noopener noreferrer" 
-                href="/" 
+                href="/dashboardUser" 
                 className="flex items-center px-4 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
               >
                 Home
@@ -54,7 +65,10 @@ const Header: React.FC = () => {
           </ul>
         </div>
         <div className="items-center flex-shrink-0">
-          <button className="px-8 py-3 font-semibold rounded bg-blue-600 text-gray-50 dark:bg-violet-600 dark:text-gray-50 hover:bg-blue-700 dark:hover:bg-violet-700">
+          <button 
+            onClick={handleLogout} // Attach handleLogout to the onClick event
+            className="px-8 py-3 font-semibold rounded bg-blue-600 text-gray-50 dark:bg-violet-600 dark:text-gray-50 hover:bg-blue-700 dark:hover:bg-violet-700"
+          >
             Logout
           </button>
         </div>
