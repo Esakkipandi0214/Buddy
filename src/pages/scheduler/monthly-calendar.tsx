@@ -4,9 +4,9 @@ import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 type Task = {
-  id: string; // Updated to string to match Calendar component
+  id: string;
   title: string;
-  date: string;
+  date: string; // Date in YYYY-MM-DD format
 }
 
 type MonthlyCalendarProps = {
@@ -17,6 +17,8 @@ type MonthlyCalendarProps = {
 
 const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ tasks, currentDate, onDateChange }) => {
   const [currentMonth, setCurrentMonth] = React.useState(new Date(currentDate));
+
+  console.log("Tasks:", tasks);
 
   const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
@@ -51,15 +53,19 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ tasks, currentDate, o
             currentMonth.getFullYear() === currentDate.getFullYear()
               ? 'bg-blue-100'
               : ''
-          }`}
+          } cursor-pointer`}
           onClick={() => isCurrentMonth && handleDateClick(dayNumber)}
         >
           {isCurrentMonth && (
             <>
               <div className="font-bold">{dayNumber}</div>
-              {dayTasks.map(task => (
-                <div key={task.id} className="text-xs truncate">{task.title}</div>
-              ))}
+              {dayTasks.length > 0 && (
+                <div className="text-xs truncate">
+                  {dayTasks.map(task => (
+                    <div key={task.id}>{task.title}</div>
+                  ))}
+                </div>
+              )}
             </>
           )}
         </div>
