@@ -3,6 +3,8 @@ import { db } from '../../firebase';
 import { collection, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot } from 'firebase/firestore';
 import MonthlyCalendar from './monthly-calendar';
 import Layout from '@/components/staticComponents/layout';
+import { useRouter } from 'next/router';
+
 
 type Task = {
   id: string;
@@ -22,6 +24,23 @@ export default function Calendar() {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const router = useRouter();
+  const [access,setAccess]=useState<boolean>(false)
+
+  useEffect(() => {
+  
+    redirect();
+  }, [router]);
+  
+  const redirect = ()=>{
+    const userUid = localStorage.getItem('userUid');
+    if(!userUid){
+      setAccess(false)
+      router.push("/")
+    }
+    setAccess(true)
+  
+  }
 
   useEffect(() => {
     setWeekDates(getWeekDates(selectedDate));
@@ -30,7 +49,11 @@ export default function Calendar() {
   useEffect(() => {
     const fetchTasks = async () => {
       const userUid = localStorage.getItem('userUid');
-      if (!userUid) return;
+      if (userUid) {
+        setAccess(true)
+      }else{
+        setAccess(false)
+      }
 
       const tasksRef = collection(db, 'Scheduler');
       const q = query(tasksRef, where('userId', '==', userUid));
@@ -132,6 +155,7 @@ export default function Calendar() {
   }
 
   return (
+    <>{access ?
     <Layout>
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4">Calendar</h1>
@@ -223,6 +247,12 @@ export default function Calendar() {
           </div>
         )}
       </div>
-    </Layout>
+    </Layout>:<div className="flex items-center bg-black justify-center h-screen">
+  <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-green-400 to-purple-500 animate-pulse">
+    Buddy...
+  </p>
+</div>
+}
+    </>
   );
 }

@@ -5,6 +5,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { getFirestore, collection, addDoc, query, where, getDocs, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore'
 import { app } from '../../firebase' // Adjust the import path as necessary
 import Layout from '@/components/staticComponents/layout'
+import { useRouter } from 'next/router';
 
 // Initialize Firebase services
 const storage = getStorage(app)
@@ -26,6 +27,23 @@ export default function FilesPage() {
   const [searching, setSearching] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fileType, setFileType] = useState('') // New state for file type
+  const router = useRouter();
+  const [access,setAccess]=useState<boolean>(false)
+
+  useEffect(() => {
+  
+    redirect();
+  }, [router]);
+  
+  const redirect = ()=>{
+    const userUid = localStorage.getItem('userUid');
+    if(!userUid){
+      setAccess(false)
+      router.push("/")
+    }
+    setAccess(true)
+  
+  }
 
   // Accepted file types (PDF, Word, Excel)
   const acceptedFileTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
@@ -138,6 +156,7 @@ export default function FilesPage() {
   }
 
   return (
+  <>{access ?
     <Layout>
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4">File Upload and Search</h1>
@@ -229,6 +248,12 @@ export default function FilesPage() {
           )}
         </ul>
       </div>
-    </Layout>
+    </Layout>:<div className="flex items-center bg-black justify-center h-screen">
+  <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-green-400 to-purple-500 animate-pulse">
+    Buddy...
+  </p>
+</div>
+    }
+    </>
   )
 }
