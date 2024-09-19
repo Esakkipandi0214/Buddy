@@ -1,37 +1,73 @@
 import React, { useState, useEffect } from 'react';
 import { Files } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, FileSpreadsheet, File } from 'lucide-react';
+import { FileText, FileSpreadsheet, File, FileVideo } from 'lucide-react';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '@/firebase'; // Import your Firebase configuration
 
 interface Document {
-  id: number;
-  name: string;
-  type: string;
+  id: string;
+  originalName: string;
+  fileType: string; // This should be derived from the file extension
+  size: number;
+  uploadedAt: string;
+  url: string;
+  userId: string;
 }
+
+// Extension to file type mapping
+const extensionToFileType: { [key: string]: string } = {
+  'pdf': 'pdf',
+  'doc': 'word',
+  'docx': 'word',
+  'xls': 'excel',
+  'xlsx': 'excel',
+  'ppt': 'powerpoint',
+  'pptx': 'powerpoint',
+  'txt': 'text',
+  // Add more mappings as needed
+};
 
 const DocumentOverview: React.FC = () => {
   const [documentCounts, setDocumentCounts] = useState<{ [key: string]: number }>({});
   const [totalDocuments, setTotalDocuments] = useState(0);
+  const userUid = localStorage.getItem('userUid');
 
   useEffect(() => {
-    // Dummy data for documents
-    const documents: Document[] = [
-      { id: 1, name: 'Project Proposal', type: 'word' },
-      { id: 2, name: 'Financial Report', type: 'excel' },
-      { id: 3, name: 'User Manual', type: 'pdf' },
-      { id: 4, name: 'Meeting Minutes', type: 'word' },
-      { id: 5, name: 'Data Analysis', type: 'excel' },
-      { id: 6, name: 'Contract', type: 'pdf' },
-      { id: 7, name: 'Presentation', type: 'powerpoint' },
-    ];
+    // Fetch data from Firestore
+    const fetchDocuments = async () => {
+      if (!userUid) {
+        console.error('No user UID found in local storage');
+        return;
+      }
 
-    const counts = documents.reduce((acc, doc) => {
-      acc[doc.type] = (acc[doc.type] || 0) + 1;
-      return acc;
-    }, {} as { [key: string]: number });
-    setDocumentCounts(counts);
-    setTotalDocuments(documents.length);
-  }, []);
+      try {
+        const q = query(collection(db, 'userFiles'), where('userId', '==', userUid));
+        const querySnapshot = await getDocs(q);
+        const documents: Document[] = querySnapshot.docs.map((doc) => {
+          const data = doc.data() as Document;
+          // Extract file extension and map to file type
+          const fileExtension = data.originalName.split('.').pop()?.toLowerCase() || '';
+          return {
+            ...data,
+            fileType: extensionToFileType[fileExtension] || 'unknown'
+          };
+        });
+
+        const counts = documents.reduce((acc, doc) => {
+          acc[doc.fileType] = (acc[doc.fileType] || 0) + 1;
+          return acc;
+        }, {} as { [key: string]: number });
+
+        setDocumentCounts(counts);
+        setTotalDocuments(documents.length);
+      } catch (error) {
+        console.error('Error fetching documents: ', error);
+      }
+    };
+
+    fetchDocuments();
+  }, [userUid]);
 
   const getFileIcon = (type: string) => {
     switch (type) {
@@ -42,7 +78,7 @@ const DocumentOverview: React.FC = () => {
       case 'pdf':
         return <File className="h-6 w-6 text-red-500" />;
       case 'powerpoint':
-        return <File className="h-6 w-6 text-orange-500" />;
+        return <FileVideo className="h-6 w-6 text-orange-500" />;
       default:
         return <File className="h-6 w-6 text-gray-500" />;
     }
