@@ -182,7 +182,7 @@ export default function Calendar() {
             placeholder="Description"
             className="border border-gray-300 p-2 m-2"
           />
-          <button onClick={handleAddTask} className="bg-blue-500 text-white p-2 rounded">
+          <button onClick={handleAddTask} className="bg-[#6d6875] text-white p-2 rounded">
             {isEditing ? 'Save Task' : 'Add Task'}
           </button>
         </div>

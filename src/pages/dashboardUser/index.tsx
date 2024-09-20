@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Dashboard from '../../components/Dashboard/dashboard';
 import Layout from '@/components/staticComponents/layout';
 import { useRouter } from 'next/router';
-
 const Index = () => {
   const router = useRouter();
   const [access, setAccess] = useState<boolean>(false);

@@ -12,7 +12,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <Header  />
       
       {/* Main content section */}
-      <div className="flex-1 mt-16 pt-8 px-1 bg-gray-100 overflow-auto">
+      <div className="flex-1 mt-16 pt-8 px-1 bg-[#e5989b] overflow-auto">
         {children}
       </div>
     </div>

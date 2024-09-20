@@ -14,7 +14,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 p-4 bg-gray-100 text-gray-800 shadow-md z-10">
+    <header className="fixed top-0 left-0 right-0 p-4 bg-[#6d6875] text-white shadow-md z-10">
       <div className="container mx-auto flex justify-between items-center h-16">
         <div className="flex items-center space-x-4">
           <Link href="/dashboardUser" aria-label="Back to dashboard">
@@ -22,7 +22,7 @@ const Header: React.FC = () => {
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
               viewBox="0 0 32 32"
-              className="w-8 h-8 text-gray-800 dark:text-violet-600"
+              className="w-8 h-8 text-white"
               aria-hidden="true"
             >
               <path d="M27.912 7.289l-10.324-5.961c-0.455-0.268-1.002-0.425-1.588-0.425s-1.133 0.158-1.604 0.433l0.015-0.008-10.324 5.961c-0.955 0.561-1.586 1.582-1.588 2.75v11.922c0.002 1.168 0.635 2.189 1.574 2.742l0.016 0.008 10.322 5.961c0.455 0.267 1.004 0.425 1.59 0.425 0.584 0 1.131-0.158 1.602-0.433l-0.014 0.008 10.322-5.961c0.955-0.561 1.586-1.582 1.588-2.75v-11.922c-0.002-1.168-0.633-2.189-1.573-2.742zM27.383 21.961c0 0.389-0.211 0.73-0.526 0.914l-0.004 0.002-10.324 5.961c-0.152 0.088-0.334 0.142-0.53 0.142s-0.377-0.053-0.535-0.145l0.005 0.002-10.324-5.961c-0.319-0.186-0.529-0.527-0.529-0.916v-11.922c0-0.389 0.211-0.73 0.526-0.914l0.004-0.002 10.324-5.961c0.152-0.090 0.334-0.143 0.53-0.143s0.377 0.053 0.535 0.144l-0.006-0.002 10.324 5.961c0.319 0.185 0.529 0.527 0.529 0.916z"></path>
@@ -33,7 +33,7 @@ const Header: React.FC = () => {
             <li>
               <Link 
                 href="/dashboardUser" 
-                className="text-blue-600 sm:text-lg text-xs font-bold dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                className="text-gray-200 sm:text-lg text-xs font-bold hover:text-white"
                 aria-label="Dashboard"
               >
                 Home
@@ -42,7 +42,7 @@ const Header: React.FC = () => {
             <li>
               <Link 
                 href="/fileuploader" 
-                className="text-blue-600 sm:text-lg text-xs font-bold dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                className="text-gray-200 sm:text-lg text-xs font-bold hover:text-white"
                 aria-label="File Uploader"
               >
                 Files
@@ -51,7 +51,7 @@ const Header: React.FC = () => {
             <li>
               <Link 
                 href="/scheduler" 
-                className="text-blue-600 sm:text-lg text-xs font-bold dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                className="text-gray-200 sm:text-lg text-xs font-bold hover:text-white"
                 aria-label="Scheduler"
               >
                 Scheduler
@@ -60,7 +60,7 @@ const Header: React.FC = () => {
             <li>
               <Link 
                 href="/ExpenseTracker" 
-                className="text-blue-600 sm:text-lg text-xs font-bold dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                className="text-gray-200 sm:text-lg text-xs font-bold hover:text-white"
                 aria-label="Expense"
               >
                 Expense
@@ -71,7 +71,7 @@ const Header: React.FC = () => {
         <div>
           <button 
             onClick={handleLogout} 
-            className="sm:px-6 px-1 ml-2 text-xs sm:text-lg py-2 font-semibold rounded bg-blue-600 text-white hover:bg-blue-700 dark:bg-violet-600 dark:hover:bg-violet-700"
+            className="sm:px-6 px-2 ml-1 text-xs sm:text-lg py-2 font-semibold rounded bg-red-600 hover:bg-red-700 transition duration-200"
             aria-label="Logout"
           >
             Logout

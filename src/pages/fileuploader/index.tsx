@@ -193,7 +193,7 @@ export default function FilesPage() {
           <button
             type="submit"
             disabled={uploading}
-            className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-blue-300 w-full sm:w-auto"
+            className="bg-[#6d6875] text-white px-4 py-2 rounded disabled:bg-blue-300 w-full sm:w-auto"
             aria-busy={uploading}
           >
             {uploading ? 'Uploading...' : 'Upload'}
@@ -223,7 +223,7 @@ export default function FilesPage() {
 
         <ul className="space-y-2" aria-live="polite">
           {files.map((file) => (
-            <li key={file.url} className="border p-2 rounded flex flex-col sm:flex-row items-center justify-between">
+            <li key={file.url} className="border bg-[#edf2f4] border-transparent p-2 rounded flex flex-col sm:flex-row items-center justify-between">
               <div className="flex flex-col sm:flex-row items-start sm:items-center">
                 <p className="text-blue-500">
                   {file.originalName}
@@ -236,7 +236,7 @@ export default function FilesPage() {
   href={file.url}
   target="_blank" // This opens the link in a new tab
   rel="noopener noreferrer" // This prevents potential security risks
-  className="bg-blue-500 text-white px-4 py-2 rounded mt-2 sm:mt-0 hover:bg-blue-700"
+  className="bg-[#6d6875] text-white px-4 py-2 rounded mt-2 sm:mt-0 hover:bg-blue-700"
 >
   Download
 </a>
