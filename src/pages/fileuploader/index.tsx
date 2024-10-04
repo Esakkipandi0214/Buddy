@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { getFirestore, collection, addDoc, query, where, getDocs, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore'
+import { getStorage, ref, uploadBytes,deleteObject, getDownloadURL } from 'firebase/storage'
+import { getFirestore, collection, addDoc, query, where, getDocs,deleteDoc, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore'
 import { app } from '../../firebase' // Adjust the import path as necessary
 import Layout from '@/components/staticComponents/layout'
 import { useRouter } from 'next/router';
@@ -155,6 +155,38 @@ export default function FilesPage() {
     }
   }
 
+  async function handleDelete(file: File) {
+    const userUid = localStorage.getItem('userUid')
+    if (!userUid) {
+      setError('User ID not found.')
+      return
+    }
+
+    try {
+      // Delete file from Firebase Storage
+      const fileRef = ref(storage, `userFiles/${userUid}/${file.originalName}`)
+      await deleteObject(fileRef)
+
+      // Delete file document from Firestore
+      const filesCollection = collection(db, 'userFiles')
+      const q = query(filesCollection, where('originalName', '==', file.originalName), where('userId', '==', userUid))
+      const querySnapshot = await getDocs(q)
+
+      // Assuming the originalName is unique per user
+      if (!querySnapshot.empty) {
+        const docRef = querySnapshot.docs[0].ref
+        await deleteDoc(docRef)
+      }
+
+      // Refresh the file list
+      await fetchFiles()
+      alert("File Deleted sucessfully...")
+    } catch (err) {
+      setError('Failed to delete file. Please try again.')
+      console.error('Error deleting file:', err)
+    }
+  }
+
   return (
   <>{access ?
     <Layout>
@@ -232,6 +264,7 @@ export default function FilesPage() {
                   Size: {(file.size / 1024).toFixed(2)} KB | Uploaded: {file.uploadedAt} | Type: {file.fileType}
                 </p>
               </div>
+              <div className=' flex gap-6'>
               <a
   href={file.url}
   target="_blank" // This opens the link in a new tab
@@ -239,8 +272,15 @@ export default function FilesPage() {
   className="bg-[#6d6875] text-white px-4 py-2 rounded mt-2 sm:mt-0 hover:bg-blue-700"
 >
   Download
-</a>
-
+</a><button
+                      onClick={() => handleDelete(file)}
+                      className="bg-red-500 text-white px-4 py-2 rounded mt-2 sm:mt-0 "
+                      aria-label={`Delete ${file.originalName}`}
+                    >
+                      Delete
+                    </button>
+              </div>
+             
             </li>
           ))}
           {files.length === 0 && !searching && (
