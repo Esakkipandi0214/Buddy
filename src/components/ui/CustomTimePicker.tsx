@@ -35,7 +35,7 @@ export default function CustomTimePicker({ hour, minute, ampm, onChange }: TimeP
         className="flex items-center justify-between border border-purple-300 rounded-lg px-3 py-2 cursor-pointer bg-white"
         onClick={() => setOpen(!open)}
       >
-        <span>{hour}:{minute} {ampm}</span>
+        <span className=" text-black">{hour}:{minute} {ampm}</span>
         <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={open ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
         </svg>
