@@ -20,6 +20,7 @@ export default function Component() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const router = useRouter()  // Initialize useRouter
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
 
    useEffect(() => {
     
@@ -36,16 +37,21 @@ export default function Component() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    setIsLoginLoading(true)
     if (!email || !password) {
       setError('Please fill in all fields')
+       setIsLoginLoading(false)
       return
     }
     if (!email.includes('@')) {
       setError('Please enter a valid email address')
+       setIsLoginLoading(false)
       return
     }
     if (password.length < 6) {
       setError('Password must be at least 6 characters long')
+       setIsLoginLoading(false)
       return
     }
     try {
@@ -64,17 +70,21 @@ export default function Component() {
         localStorage.setItem('userUid', userData.uid)
       } else {
         setError('User not found in database.')
+         setIsLoginLoading(false)
         return
       }
 
       setError('')
+       setIsLoginLoading(false)
       setSuccess('Login successful')
       console.log('Login successful')
       setTimeout(() => {
+        
         router.push('/scheduler')  // Redirect to the scheduler page
       }, 1000)  // Optional delay for success message visibility
     } catch (error) {
       setSuccess('')
+       setIsLoginLoading(false)
       setError('Failed to login. Please check your credentials.')
       console.error('Login error:', error)
     }
@@ -138,9 +148,37 @@ export default function Component() {
       Forgot Password?
     </Link>
   </p>
-        <Button type="submit" className="w-full bg-gradient-to-r from-yellow-500 to-purple-700 hover:from-yellow-600 hover:to-purple-800 text-white font-bold py-2 px-4 rounded transition-all duration-200">
-          Login
-        </Button>
+        <Button
+  type="submit"
+  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-500 to-purple-700 hover:from-yellow-600 hover:to-purple-800 text-white font-bold py-2 px-4 rounded transition-all duration-200"
+  disabled={isLoginLoading} // prevent multiple clicks while loading
+>
+  {isLoginLoading ? (
+    <svg
+      className="animate-spin h-5 w-5 text-white"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      ></path>
+    </svg>
+  ) : (
+    "Login"
+  )}
+</Button>
+
       </form>
     </CardContent>
     <CardFooter className="flex justify-center">

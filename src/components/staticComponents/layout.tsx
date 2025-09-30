@@ -44,9 +44,9 @@ const Layout: React.FC<LayoutProps> = ({ children, loadDelay = 1000 }) => {
         <main
           className={`
             flex-1 overflow-auto transition-all duration-300
-            pt-20 px-1 md:pt-6 md:px-6
+            pt-20 px-1  lg:pt-6 lg:px-6
             bg-white/70 backdrop-blur-sm rounded-tl-3xl shadow-inner
-            ${collapsed ? "md:ml-20" : "md:ml-60"} 
+            ${collapsed ? "lg:ml-20" : "lg:ml-60"} 
             ${isOpen ? "blur-sm pointer-events-none" : ""}
           `}
         >

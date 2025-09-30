@@ -15,6 +15,7 @@ import Layout from "@/components/staticComponents/layout";
 import { useRouter } from "next/router";
 import CustomTimePicker from "@/components/ui/CustomTimePicker";
 import { Plus, Check, Trash2, Edit2 } from "lucide-react";
+import checkUserExists from '../../utils/checkUserExists';
 
 type Task = {
   id: string;
@@ -39,15 +40,25 @@ export default function Calendar() {
   const [access, setAccess] = useState<boolean>(false);
   const router = useRouter();
 
-  useEffect(() => {
-    const userUid = localStorage.getItem("userUid");
-    if (!userUid) {
-      setAccess(false);
-      router.push("/");
-    } else {
-      setAccess(true);
+ useEffect(() => {
+    const verifyUser = async () => {
+      const userUid = localStorage.getItem("userUid")
+      if (!userUid) {
+        localStorage.clear()
+        router.push("/")
+        return
+      }
+
+      const exists = await checkUserExists(userUid)
+      if (exists) {
+        setAccess(true)
+      } else {
+        router.push("/")
+      }
     }
-  }, []);
+
+    verifyUser()
+  }, [router])
 
   useEffect(() => {
     const userUid = localStorage.getItem("userUid");
@@ -160,7 +171,7 @@ export default function Calendar() {
             <div
               className={`fixed right-0 bg-white shadow-2xl p-6 z-50 transform transition-transform duration-300
                 ${isDrawerOpen ? "translate-x-0" : "translate-x-full"}
-                top-16 sm:top-0 sm:w-96 w-full h-[calc(100%-4rem)] sm:h-full rounded-tl-3xl sm:rounded-none`}
+                top-0 pt-20 md:pt-20 lg:pt-0 sm:top-0 sm:w-96 w-full h-full rounded-tl-3xl sm:rounded-none`}
             >
               {/* Header */}
               <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
@@ -283,9 +294,13 @@ export default function Calendar() {
           </div>
         </Layout>
       ) : (
-        <div className="flex items-center bg-gradient-to-r from-purple-700 via-pink-600 to-red-600 justify-center h-screen">
-          <p className="text-lg sm:text-2xl font-bold text-white animate-pulse">Buddy...</p>
-        </div>
+        <div className="fixed inset-0 flex justify-center items-center bg-white/80 z-50">
+    <div className="relative w-20 h-20">
+      <div className="absolute inset-0 border-4 border-t-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="absolute inset-2 border-4 border-t-4 border-pink-500 border-t-transparent rounded-full animate-spin animation-delay-150"></div>
+      <div className="absolute inset-4 border-4 border-t-4 border-indigo-500 border-t-transparent rounded-full animate-spin animation-delay-300"></div>
+    </div>
+  </div>
       )}
     </>
   );

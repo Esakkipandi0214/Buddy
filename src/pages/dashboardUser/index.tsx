@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Dashboard from '../../components/Dashboard/dashboard';
 import Layout from '@/components/staticComponents/layout';
 import { useRouter } from 'next/router';
+import checkUserExists from '../../utils/checkUserExists';
 const Index = () => {
   const router = useRouter();
   const [access, setAccess] = useState<boolean>(false);
@@ -11,24 +12,32 @@ const Index = () => {
     redirect();
   }, [router]);
   
-  const redirect = () => {
-    const userUid = localStorage.getItem('userUid');
-    if (!userUid) {
-      setAccess(false);
-      router.push('/');
-    } else {
-      setAccess(true);
-    }
+  const redirect =async() => {
+     const userUid = localStorage.getItem("userUid")
+      if (!userUid) {
+        localStorage.clear()
+        router.push("/")
+        return
+      }
+
+      const exists = await checkUserExists(userUid)
+      if (exists) {
+        setAccess(true)
+      } else {
+        router.push("/")
+      }
     setIsLoading(false);
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-green-400 to-purple-500 animate-pulse">
-          Loading, Buddy...
-        </p>
-      </div>
+       <div className="fixed inset-0 flex justify-center items-center bg-white/80 z-50">
+    <div className="relative w-20 h-20">
+      <div className="absolute inset-0 border-4 border-t-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="absolute inset-2 border-4 border-t-4 border-pink-500 border-t-transparent rounded-full animate-spin animation-delay-150"></div>
+      <div className="absolute inset-4 border-4 border-t-4 border-indigo-500 border-t-transparent rounded-full animate-spin animation-delay-300"></div>
+    </div>
+  </div>
     );
   }
 

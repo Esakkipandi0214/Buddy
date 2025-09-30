@@ -42,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({
     <>
       {/* Sidebar for large screens */}
       <aside
-        className={`hidden md:flex fixed top-0 left-0 h-full ${
+        className={`hidden lg:flex fixed top-0 left-0 h-full ${
           collapsed ? "w-20" : "w-60"
         } bg-gradient-to-b from-indigo-900 via-purple-800 to-indigo-900 text-white flex-col justify-between shadow-2xl z-20 transition-all duration-300`}
       >
@@ -93,10 +93,12 @@ const Header: React.FC<HeaderProps> = ({
       </aside>
 
       {/* Top header for mobile */}
-      <header className="md:hidden fixed top-0 left-0 right-0 p-4 bg-gradient-to-r from-indigo-900 via-purple-800 to-indigo-900 text-white shadow-md z-20 flex justify-between items-center">
+      <header className="lg:hidden fixed top-0 left-0 right-0 p-4 bg-gradient-to-r from-indigo-900 via-purple-800 to-indigo-900 text-white shadow-md z-20 flex justify-between items-center">
         <div className="flex items-center gap-2 text-lg font-bold">
-          <Home className="w-6 h-6" />
-          <span>Dashboard</span>
+          {/* <Home className="w-6 h-6" /> */}
+           <span className="text-xl font-extrabold tracking-wide bg-gradient-to-r from-pink-400 to-yellow-300 text-transparent bg-clip-text">
+                Dashboard
+              </span>
         </div>
         <button onClick={() => setIsOpen(!isOpen)} aria-label="Menu">
           {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -107,12 +109,14 @@ const Header: React.FC<HeaderProps> = ({
       <div
         className={`fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-indigo-900 via-purple-800 to-indigo-900 text-white shadow-2xl z-30 flex flex-col justify-between transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } md:hidden`}
+        } lg:hidden`}
       >
         <div className="p-6 space-y-6">
           <div className="flex items-center gap-2 text-2xl font-bold">
-            <Home className="w-6 h-6" />
-            <span>Dashboard</span>
+            {/* <Home className="w-6 h-6" /> */}
+             <span className="text-xl font-extrabold tracking-wide bg-gradient-to-r from-pink-400 to-yellow-300 text-transparent bg-clip-text">
+                Dashboard
+              </span>
           </div>
           <nav className="flex flex-col space-y-4">
             {navLinks.map((link) => (

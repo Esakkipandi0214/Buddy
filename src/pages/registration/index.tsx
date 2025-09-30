@@ -20,22 +20,27 @@ export default function Component() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const router = useRouter()  // Initialize useRouter
+   const [isSignupLoading, setIsSignupLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')  // Clear previous errors
     setSuccess('')  // Clear previous success message
+    setIsSignupLoading(true)
     
     if (!name || !email || !password) {
       setError('Please fill in all fields')
+      setIsSignupLoading(false)
       return
     }
     if (!email.includes('@')) {
       setError('Please enter a valid email address')
+      setIsSignupLoading(false)
       return
     }
     if (password.length < 6) {
       setError('Password must be at least 6 characters long')
+      setIsSignupLoading(false)
       return
     }
 
@@ -47,6 +52,7 @@ export default function Component() {
 
       if (!querySnapshot.empty) {
         setError('Email is already registered. Please use a different email or login.')
+        setIsSignupLoading(false)
         return
       }
 
@@ -66,6 +72,7 @@ export default function Component() {
       setError('')
       setSuccess('Account created successfully')
       console.log('Account created successfully')
+      setIsSignupLoading(false)
 
       setTimeout(() => {
         router.push('/')  // Redirect to the scheduler page
@@ -74,6 +81,7 @@ export default function Component() {
     } catch (error) {
       setSuccess('')
       setError('Failed to create an account. Please check your credentials.')
+      setIsSignupLoading(false)
       console.error('Registration error:', error)
     }
   }
@@ -142,8 +150,31 @@ export default function Component() {
         </div>
         {error && <p className="text-sm text-yellow-300 bg-red-700/50 p-2 rounded">{error}</p>}
         {success && <p className="text-sm text-yellow-300 bg-green-700/50 p-2 rounded">{success}</p>}
-        <Button type="submit" className="w-full bg-gradient-to-r from-yellow-500 to-purple-700 hover:from-yellow-600 hover:to-purple-800 text-white font-bold py-2 px-4 rounded transition-all duration-200">
-          Create Account
+        <Button   disabled={isSignupLoading} type="submit" className="w-full bg-gradient-to-r from-yellow-500 to-purple-700 hover:from-yellow-600 hover:to-purple-800 text-white font-bold py-2 px-4 rounded transition-all duration-200">
+          {isSignupLoading ? (
+    <svg
+      className="animate-spin h-5 w-5 text-white"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      ></path>
+    </svg>
+  ) : (
+    "Create Account"
+  )}
         </Button>
       </form>
     </CardContent>
