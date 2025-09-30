@@ -221,7 +221,7 @@ export default function Calendar() {
               </div>
 
               {/* Floating Add Task Button */}
-              <div className="fixed bottom-6 right-6 flex justify-end z-50">
+              <div className="fixed bottom-6 md:bottom-14 lg:bottom-14 right-6 flex justify-end z-50">
                 <button
                   onClick={() => setShowAddForm((prev) => !prev)}
                   className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
