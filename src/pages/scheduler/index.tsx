@@ -171,7 +171,7 @@ export default function Calendar() {
             <div
               className={`fixed right-0 bg-white shadow-2xl p-6 z-50 transform transition-transform duration-300
                 ${isDrawerOpen ? "translate-x-0" : "translate-x-full"}
-                top-0 pt-20 md:pt-20 lg:pt-0 sm:top-0 sm:w-96 w-full h-full rounded-tl-3xl sm:rounded-none`}
+                top-0 pt-20 md:pt-20 lg:pt-5 sm:top-0 sm:w-96 w-full h-full rounded-tl-3xl sm:rounded-none`}
             >
               {/* Header */}
               <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
