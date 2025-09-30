@@ -1,8 +1,8 @@
 'use client'
 
-import React, { Suspense, useState } from 'react'
+import React, { Suspense, useState, useEffect } from 'react'
+import { QRCodeCanvas } from 'qrcode.react'
 
-// Loader component
 const Loader = () => (
   <div className="flex justify-center items-center py-20">
     <div className="relative w-16 h-16">
@@ -14,6 +14,7 @@ const Loader = () => (
 )
 
 interface FileItem {
+  docId?: string
   url: string
   originalName: string
   size: number
@@ -28,14 +29,20 @@ interface FileListProps {
 
 const FileList: React.FC<FileListProps> = ({ files, handleDeleteClick }) => {
   const [confirmDownloadUrl, setConfirmDownloadUrl] = useState<string | null>(null)
+  const [qrFile, setQrFile] = useState<FileItem | null>(null)
+  const [origin, setOrigin] = useState<string>('')
 
- const handleConfirmDownload = (file: FileItem) => {
-  // Open file URL in a new browser tab
-  window.open(file.url, '_blank')
-  
-  // Reset confirmation state
-  setConfirmDownloadUrl(null)
-}
+  // Set origin on client side only
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin)
+    }
+  }, [])
+
+  const handleConfirmDownload = (file: FileItem) => {
+    window.open(file.url, '_blank')
+    setConfirmDownloadUrl(null)
+  }
 
   return (
     <Suspense fallback={<Loader />}>
@@ -58,22 +65,31 @@ const FileList: React.FC<FileListProps> = ({ files, handleDeleteClick }) => {
               <div className="flex gap-2 sm:gap-4 mt-2 sm:mt-0 flex-wrap">
                 {confirmDownloadUrl === file.url ? (
                   <>
-                    {/* Confirm Download ✅ */}
                     <button
                       onClick={() => handleConfirmDownload(file)}
                       className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-full flex items-center justify-center"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </button>
-
-                    {/* Cancel ❌ */}
                     <button
                       onClick={() => setConfirmDownloadUrl(null)}
                       className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full flex items-center justify-center"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
@@ -92,6 +108,12 @@ const FileList: React.FC<FileListProps> = ({ files, handleDeleteClick }) => {
                     >
                       Delete
                     </button>
+                    <button
+                      onClick={() => setQrFile(file)}
+                      className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+                    >
+                      QR
+                    </button>
                   </>
                 )}
               </div>
@@ -103,6 +125,28 @@ const FileList: React.FC<FileListProps> = ({ files, handleDeleteClick }) => {
           </li>
         )}
       </ul>
+
+      {/* QR Modal */}
+      {qrFile && origin && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
+            <h2 className="text-lg text-black font-bold mb-4">{qrFile.originalName} QR</h2>
+            <QRCodeCanvas
+              id={`qr-${qrFile.docId}`}
+              value={`${origin}/File-shared-download?fileId=${qrFile.docId}`}
+              size={200}
+            />
+            <div className="mt-4 flex gap-4">
+              <button
+                onClick={() => setQrFile(null)}
+                className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Suspense>
   )
 }
