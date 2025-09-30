@@ -40,16 +40,25 @@ export default function ForgotPassword() {
     })
 
   setSuccess('Password reset email sent! Check your inbox(check spam if not in Inbox).')
-} catch (err: any) {
-  console.error(err)
-  if (err.code === 'auth/user-not-found') {
-    setError('No user found with this email.')
-  } else if (err.code === 'auth/invalid-email') {
-    setError('Invalid email address.')
+} catch (err: unknown) {
+  console.error(err);
+
+  // Narrow the type
+  if (err instanceof Error && 'code' in err) {
+    const errorWithCode = err as { code: string };
+
+    if (errorWithCode.code === 'auth/user-not-found') {
+      setError('No user found with this email.');
+    } else if (errorWithCode.code === 'auth/invalid-email') {
+      setError('Invalid email address.');
+    } else {
+      setError('Failed to send reset email. Please try again.');
+    }
   } else {
-    setError('Failed to send reset email. Please try again.')
+    setError('Failed to send reset email. Please try again.');
   }
-} finally {
+}
+ finally {
   setLoading(false)
 }
   }
