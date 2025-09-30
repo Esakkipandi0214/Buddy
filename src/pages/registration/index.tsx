@@ -58,7 +58,9 @@ export default function Component() {
       await setDoc(doc(db, 'users', user.uid), {
         name: name,
         email: email,
-        uid: user.uid
+        uid: user.uid,
+         storageLimit: 500 * 1024 * 1024, // 500 MB in bytes
+  usedStorage: 0 // no files uploaded yet
       })
 
       setError('')

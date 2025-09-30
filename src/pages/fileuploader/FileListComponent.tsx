@@ -1,19 +1,17 @@
-import React, { Suspense } from 'react'
+'use client'
+
+import React, { Suspense, useState } from 'react'
 
 // Loader component
 const Loader = () => (
   <div className="flex justify-center items-center py-20">
     <div className="relative w-16 h-16">
-      {/* Outer spinning ring */}
       <div className="absolute inset-0 border-4 border-t-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-      {/* Middle spinning ring */}
       <div className="absolute inset-2 border-4 border-t-4 border-pink-500 border-t-transparent rounded-full animate-spin animation-delay-150"></div>
-      {/* Inner spinning ring */}
       <div className="absolute inset-4 border-4 border-t-4 border-indigo-500 border-t-transparent rounded-full animate-spin animation-delay-300"></div>
     </div>
   </div>
 )
-
 
 interface FileItem {
   url: string
@@ -29,11 +27,21 @@ interface FileListProps {
 }
 
 const FileList: React.FC<FileListProps> = ({ files, handleDeleteClick }) => {
+  const [confirmDownloadUrl, setConfirmDownloadUrl] = useState<string | null>(null)
+
+ const handleConfirmDownload = (file: FileItem) => {
+  // Open file URL in a new browser tab
+  window.open(file.url, '_blank')
+  
+  // Reset confirmation state
+  setConfirmDownloadUrl(null)
+}
+
   return (
     <Suspense fallback={<Loader />}>
       <ul className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4">
         {files?.length > 0 ? (
-          files?.map(file => (
+          files.map(file => (
             <li
               key={file.url}
               className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-white rounded-2xl shadow hover:shadow-lg transition-all duration-300"
@@ -46,21 +54,46 @@ const FileList: React.FC<FileListProps> = ({ files, handleDeleteClick }) => {
                   Type: {file.fileType}
                 </p>
               </div>
+
               <div className="flex gap-2 sm:gap-4 mt-2 sm:mt-0 flex-wrap">
-                <a
-                  href={file.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
-                >
-                  Download
-                </a>
-                <button
-                  onClick={() => handleDeleteClick(file)}
-                  className="bg-red-500 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
-                >
-                  Delete
-                </button>
+                {confirmDownloadUrl === file.url ? (
+                  <>
+                    {/* Confirm Download ✅ */}
+                    <button
+                      onClick={() => handleConfirmDownload(file)}
+                      className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-full flex items-center justify-center"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </button>
+
+                    {/* Cancel ❌ */}
+                    <button
+                      onClick={() => setConfirmDownloadUrl(null)}
+                      className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full flex items-center justify-center"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setConfirmDownloadUrl(file.url)}
+                      className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+                    >
+                      Download
+                    </button>
+                    <button
+                      onClick={() => handleDeleteClick(file)}
+                      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
               </div>
             </li>
           ))

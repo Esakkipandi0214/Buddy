@@ -2,20 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Files } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, FileSpreadsheet, File, FileVideo } from 'lucide-react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import { db } from '@/firebase'; // Import your Firebase configuration
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { db } from '@/firebase';
 
 interface Document {
   id: string;
   originalName: string;
-  fileType: string; // This should be derived from the file extension
+  fileType: string;
   size: number;
   uploadedAt: string;
   url: string;
   userId: string;
 }
 
-// Extension to file type mapping
 const extensionToFileType: { [key: string]: string } = {
   'pdf': 'pdf',
   'doc': 'word',
@@ -25,28 +24,26 @@ const extensionToFileType: { [key: string]: string } = {
   'ppt': 'powerpoint',
   'pptx': 'powerpoint',
   'txt': 'text',
-  // Add more mappings as needed
 };
 
 const DocumentOverview: React.FC = () => {
   const [documentCounts, setDocumentCounts] = useState<{ [key: string]: number }>({});
   const [totalDocuments, setTotalDocuments] = useState(0);
+  const [storageLimit, setStorageLimit] = useState(0);
+  const [usedStorage, setUsedStorage] = useState(0);
+
   const userUid = localStorage.getItem('userUid');
 
   useEffect(() => {
-    // Fetch data from Firestore
-    const fetchDocuments = async () => {
-      if (!userUid) {
-        console.error('No user UID found in local storage');
-        return;
-      }
+    if (!userUid) return;
 
+    const fetchDocumentsAndStorage = async () => {
       try {
+        // Fetch documents
         const q = query(collection(db, 'userFiles'), where('userId', '==', userUid));
         const querySnapshot = await getDocs(q);
         const documents: Document[] = querySnapshot.docs.map((doc) => {
           const data = doc.data() as Document;
-          // Extract file extension and map to file type
           const fileExtension = data.originalName.split('.').pop()?.toLowerCase() || '';
           return {
             ...data,
@@ -54,6 +51,7 @@ const DocumentOverview: React.FC = () => {
           };
         });
 
+        // Count documents by type
         const counts = documents.reduce((acc, doc) => {
           acc[doc.fileType] = (acc[doc.fileType] || 0) + 1;
           return acc;
@@ -61,31 +59,46 @@ const DocumentOverview: React.FC = () => {
 
         setDocumentCounts(counts);
         setTotalDocuments(documents.length);
+
+        // Calculate used storage from documents
+        const totalUsed = documents.reduce((sum, doc) => sum + (doc.size || 0), 0);
+        setUsedStorage(totalUsed);
+
+        // Fetch user's storage limit from 'users' collection
+        const userDoc = await getDoc(doc(db, 'users', userUid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setStorageLimit(userData?.storageLimit || 0);
+        }
+
       } catch (error) {
-        console.error('Error fetching documents: ', error);
+        console.error('Error fetching documents or storage: ', error);
       }
     };
 
-    fetchDocuments();
+    fetchDocumentsAndStorage();
   }, [userUid]);
 
   const getFileIcon = (type: string) => {
     switch (type) {
-      case 'word':
-        return <FileText className="h-6 w-6 text-blue-500" />;
-      case 'excel':
-        return <FileSpreadsheet className="h-6 w-6 text-green-500" />;
-      case 'pdf':
-        return <File className="h-6 w-6 text-red-500" />;
-      case 'powerpoint':
-        return <FileVideo className="h-6 w-6 text-orange-500" />;
-      default:
-        return <File className="h-6 w-6 text-gray-500" />;
+      case 'word': return <FileText className="h-6 w-6 text-blue-500" />;
+      case 'excel': return <FileSpreadsheet className="h-6 w-6 text-green-500" />;
+      case 'pdf': return <File className="h-6 w-6 text-red-500" />;
+      case 'powerpoint': return <FileVideo className="h-6 w-6 text-orange-500" />;
+      default: return <File className="h-6 w-6 text-gray-500" />;
     }
   };
 
+  const formatBytes = (bytes: number) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+  };
+
   return (
-     <Card className="bg-gradient-to-br from-white/90 to-white/70 backdrop-blur-lg border border-white/30 shadow-2xl rounded-3xl transition-all duration-300 hover:shadow-[0_10px_30px_rgba(139,92,246,0.3)] hover:scale-[1.01]">
+    <Card className="bg-gradient-to-br from-white/90 to-white/70 backdrop-blur-lg border border-white/30 shadow-2xl rounded-3xl transition-all duration-300 hover:shadow-[0_10px_30px_rgba(139,92,246,0.3)] hover:scale-[1.01]">
       <CardHeader className="pb-4 border-b border-purple-200">
         <CardTitle className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-purple-600 via-pink-500 to-yellow-400 text-transparent bg-clip-text">
           Document Overview
@@ -98,7 +111,7 @@ const DocumentOverview: React.FC = () => {
           <div className="col-span-2 sm:col-span-3 md:col-span-5 flex items-center justify-center p-4 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 text-white rounded-xl shadow-lg hover:scale-105 transition-transform duration-200">
             <Files className="h-6 w-6 mr-2" />
             <span className="text-lg sm:text-xl font-bold">
-              Total Documents: {totalDocuments}
+              Total Documents: {totalDocuments} | Storage: {formatBytes(usedStorage)} / {formatBytes(storageLimit)}
             </span>
           </div>
 

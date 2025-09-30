@@ -8,7 +8,7 @@ import {
   Home,
   FileText,
   Calendar,
-  Wallet,
+  // Wallet,
   ChevronLeft,
 } from "lucide-react";
 
@@ -36,7 +36,6 @@ const Header: React.FC<HeaderProps> = ({
     { name: "Home", href: "/dashboardUser", icon: <Home className="w-5 h-5" /> },
     { name: "Files", href: "/fileuploader", icon: <FileText className="w-5 h-5" /> },
     { name: "Scheduler", href: "/scheduler", icon: <Calendar className="w-5 h-5" /> },
-    { name: "Expense", href: "/ExpenseTracker", icon: <Wallet className="w-5 h-5" /> },
   ];
 
   return (
