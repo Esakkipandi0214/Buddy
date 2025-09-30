@@ -74,7 +74,7 @@ export default function Calendar() {
     return `${year}-${month}-${day}`;
   }
 
-  const tasksForSelectedDate = tasks.filter(
+  const tasksForSelectedDate = tasks?.filter(
     (task) => task.date === formatDate(selectedDate)
   );
 

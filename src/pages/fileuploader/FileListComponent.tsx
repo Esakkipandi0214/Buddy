@@ -32,8 +32,8 @@ const FileList: React.FC<FileListProps> = ({ files, handleDeleteClick }) => {
   return (
     <Suspense fallback={<Loader />}>
       <ul className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4">
-        {files.length > 0 ? (
-          files.map(file => (
+        {files?.length > 0 ? (
+          files?.map(file => (
             <li
               key={file.url}
               className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-white rounded-2xl shadow hover:shadow-lg transition-all duration-300"
