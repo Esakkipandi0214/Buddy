@@ -1,10 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { db } from '../../firebase';
-import { collection, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot } from 'firebase/firestore';
-import MonthlyCalendar from './monthly-calendar';
-import Layout from '@/components/staticComponents/layout';
-import { useRouter } from 'next/router';
-
+import React, { useState, useEffect } from "react";
+import { db } from "../../firebase";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  query,
+  where,
+  onSnapshot,
+} from "firebase/firestore";
+import MonthlyCalendar from "./monthly-calendar";
+import Layout from "@/components/staticComponents/layout";
+import { useRouter } from "next/router";
+import CustomTimePicker from "@/components/ui/CustomTimePicker";
+import { Plus, Check, Trash2, Edit2 } from "lucide-react";
 
 type Task = {
   id: string;
@@ -17,242 +27,324 @@ type Task = {
 export default function Calendar() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [weekDates, setWeekDates] = useState<Date[]>(getWeekDates(new Date()));
-  const [newTaskTitle, setNewTaskTitle] = useState<string>('');
-  const [newTaskTime, setNewTaskTime] = useState<string>('');
-  const [newTaskDescription, setNewTaskDescription] = useState<string>('');
+  const [newTaskTitle, setNewTaskTitle] = useState<string>("");
+  const [newTaskDescription, setNewTaskDescription] = useState<string>("");
+  const [newTaskHour, setNewTaskHour] = useState<string>("12");
+  const [newTaskMinute, setNewTaskMinute] = useState<string>("00");
+  const [newTaskAmPm, setNewTaskAmPm] = useState<string>("AM");
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [showAddForm, setShowAddForm] = useState<boolean>(false);
+  const [access, setAccess] = useState<boolean>(false);
   const router = useRouter();
-  const [access,setAccess]=useState<boolean>(false)
 
   useEffect(() => {
-  
-    redirect();
-  }, [router]);
-  
-  const redirect = ()=>{
-    const userUid = localStorage.getItem('userUid');
-    if(!userUid){
-      setAccess(false)
-      router.push("/")
+    const userUid = localStorage.getItem("userUid");
+    if (!userUid) {
+      setAccess(false);
+      router.push("/");
+    } else {
+      setAccess(true);
     }
-    setAccess(true)
-  
-  }
-
-  useEffect(() => {
-    setWeekDates(getWeekDates(selectedDate));
-  }, [selectedDate]);
-
-  useEffect(() => {
-    const fetchTasks = async () => {
-      const userUid = localStorage.getItem('userUid');
-      if (userUid) {
-        setAccess(true)
-      }else{
-        setAccess(false)
-      }
-
-      const tasksRef = collection(db, 'Scheduler');
-      const q = query(tasksRef, where('userId', '==', userUid));
-
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const tasksData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Omit<Task, 'id'>),
-        }));
-        setTasks(tasksData);
-      });
-
-      return () => unsubscribe();
-    };
-
-    fetchTasks();
   }, []);
 
   useEffect(() => {
-    if (tasks.some((task) => task.date === formatDate(selectedDate))) {
-      setIsModalOpen(true);
-    } else {
-      setIsModalOpen(false);
-    }
-  }, [selectedDate, tasks]);
+    const userUid = localStorage.getItem("userUid");
+    if (!userUid) return;
 
-  function getWeekDates(date: Date): Date[] {
-    const start = new Date(date);
-    start.setDate(start.getDate() - start.getDay() + 1); // Adjust to Monday
-    return Array(7)
-      .fill(null)
-      .map((_, i) => {
-        const day = new Date(start);
-        day.setDate(day.getDate() + i);
-        return day;
-      });
-  }
+    const tasksRef = collection(db, "Scheduler");
+    const q = query(tasksRef, where("userId", "==", userUid));
 
-  function formatDate(date: Date): string {
-    // Format date as YYYY-MM-DD
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const tasksData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Omit<Task, "id">),
+      }));
+      setTasks(tasksData);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  function formatDate(date: Date) {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   }
 
-  async function handleAddTask() {
-    if (!newTaskTitle || !newTaskTime) return;
+  const tasksForSelectedDate = tasks.filter(
+    (task) => task.date === formatDate(selectedDate)
+  );
 
-    const userUid = localStorage.getItem('userUid');
-    if (!userUid) {
-      console.error('User not authenticated');
-      return;
-    }
+  async function handleAddOrEditTask() {
+    if (!newTaskTitle) return;
+
+    const userUid = localStorage.getItem("userUid");
+    if (!userUid) return;
 
     const taskDate = formatDate(selectedDate);
+    const taskTime = `${newTaskHour}:${newTaskMinute} ${newTaskAmPm}`;
 
     if (isEditing && editingTaskId) {
-      const taskRef = doc(db, 'Scheduler', editingTaskId);
+      const taskRef = doc(db, "Scheduler", editingTaskId);
       await updateDoc(taskRef, {
         title: newTaskTitle,
-        time: newTaskTime,
+        time: taskTime,
         description: newTaskDescription,
         date: taskDate,
       });
       setIsEditing(false);
       setEditingTaskId(null);
     } else {
-      const newTask = {
+      await addDoc(collection(db, "Scheduler"), {
         title: newTaskTitle,
         date: taskDate,
-        time: newTaskTime,
+        time: taskTime,
         description: newTaskDescription,
-        userId: userUid
-      };
-      await addDoc(collection(db, 'Scheduler'), newTask);
+        userId: userUid,
+      });
     }
 
-    // Clear input fields
-    setNewTaskTitle('');
-    setNewTaskTime('');
-    setNewTaskDescription('');
+    // Reset form
+    setNewTaskTitle("");
+    setNewTaskHour("12");
+    setNewTaskMinute("00");
+    setNewTaskAmPm("AM");
+    setNewTaskDescription("");
+    setShowAddForm(false);
   }
 
-  async function handleEditTask(task: Task) {
+  function handleEditTask(task: Task) {
     setIsEditing(true);
     setEditingTaskId(task.id);
     setNewTaskTitle(task.title);
-    setNewTaskTime(task.time);
+
+    const [hourMin, ampm] = task.time.split(" ");
+    const [hour, minute] = hourMin.split(":");
+    setNewTaskHour(hour);
+    setNewTaskMinute(minute);
+    setNewTaskAmPm(ampm);
+
     setNewTaskDescription(task.description);
+    setIsDrawerOpen(true);
+    setShowAddForm(true);
   }
 
   async function handleDeleteTask(id: string) {
-    await deleteDoc(doc(db, 'Scheduler', id));
-  }
-
-  if (weekDates.length === 0) {
-    return <div>Loading...</div>;
+    await deleteDoc(doc(db, "Scheduler", id));
   }
 
   return (
-    <>{access ?
-    <Layout>
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Calendar</h1>
+    <>
+      {access ? (
+        <Layout>
+          <div className="container mx-auto p-4">
+            <h1 className="text-3xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-500 to-red-500">
+              Calendar & Tasks
+            </h1>
 
-        <div className="mb-4">
-          {/* Task Input */}
-          <input
-            type="text"
-            value={newTaskTitle}
-            onChange={(e) => setNewTaskTitle(e.target.value)}
-            placeholder="Task Title"
-            className="border border-gray-300 p-2 m-2"
-          />
-          <input
-            type="time"
-            value={newTaskTime}
-            onChange={(e) => setNewTaskTime(e.target.value)}
-            className="border border-gray-300 p-2 m-2"
-          />
-          <input
-            type="text"
-            value={newTaskDescription}
-            onChange={(e) => setNewTaskDescription(e.target.value)}
-            placeholder="Description"
-            className="border border-gray-300 p-2 m-2"
-          />
-          <button onClick={handleAddTask} className="bg-[#6d6875] text-white p-2 rounded">
-            {isEditing ? 'Save Task' : 'Add Task'}
-          </button>
-        </div>
+            <div className="mb-6 bg-white rounded-xl shadow-md p-4 border border-purple-200">
+              <MonthlyCalendar
+                tasks={tasks}
+                currentDate={selectedDate}
+                onDateChange={(date) => {
+                  setSelectedDate(date);
+                  setIsDrawerOpen(true);
+                }}
+              />
+            </div>
 
-        {/* Pass tasks to MonthlyCalendar */}
-        <div className="mb-4">
-          <MonthlyCalendar tasks={tasks} currentDate={selectedDate} onDateChange={setSelectedDate} />
-        </div>
-
-        {isModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 sm:p-0 p-2 z-50">
-            <div className="bg-white sm:p-6 p-2 rounded-lg shadow-lg w-full max-w-2xl">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Tasks on {selectedDate.toDateString()}:</h2>
-                <button onClick={() => setIsModalOpen(false)} className="text-gray-400 bg-red-500 px-2 border rounded-lg">
+            {/* Side Drawer */}
+            <div
+              className={`fixed right-0 bg-white shadow-2xl p-6 z-50 transform transition-transform duration-300
+                ${isDrawerOpen ? "translate-x-0" : "translate-x-full"}
+                top-16 sm:top-0 sm:w-96 w-full h-[calc(100%-4rem)] sm:h-full rounded-tl-3xl sm:rounded-none`}
+            >
+              {/* Header */}
+              <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
+                <h2 className="text-xl font-bold text-purple-700 text-center sm:text-left">
+                  Tasks for {selectedDate.toDateString()}
+                </h2>
+                <button
+                  onClick={() => {
+                    setIsDrawerOpen(false);
+                    setIsEditing(false);
+                    setEditingTaskId(null);
+                    setNewTaskTitle("");
+                    setNewTaskHour("12");
+                    setNewTaskMinute("00");
+                    setNewTaskAmPm("AM");
+                    setNewTaskDescription("");
+                    setShowAddForm(false);
+                  }}
+                  className="text-white bg-gradient-to-r from-red-500 to-pink-600 px-3 py-1 rounded-lg hover:opacity-90 active:scale-95 transition"
+                >
                   &times;
                 </button>
               </div>
 
-              <div className="overflow-x-auto">
-                {tasks.filter((task) => task.date === formatDate(selectedDate)).length > 0 ? (
-                  <table className="min-w-full table-auto">
-                    <thead className="bg-gray-200 text-gray-700">
-                      <tr>
-                        <th className="px-4 py-2 text-left">Title</th>
-                        <th className="px-4 py-2 text-left">Time</th>
-                        <th className="px-4 py-2 text-left">Description</th>
-                        <th className="px-4 py-2 text-left">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tasks
-                        .filter((task) => task.date === formatDate(selectedDate))
-                        .map((task, index) => (
-                          <tr key={task.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b`}>
-                            <td className="px-4 py-2 text-gray-900 font-medium">{task.title}</td>
-                            <td className="px-4 py-2 text-gray-600">{task.time}</td>
-                            <td className="px-4 py-2 text-gray-600">{task.description}</td>
-                            <td className="px-4 py-2">
-                              <button
-                                onClick={() => handleEditTask(task)}
-                                className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded mr-2"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDeleteTask(task.id)}
-                                className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded"
-                              >
-                                Delete
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
+              {/* Task List */}
+              <div
+                className={`overflow-y-auto mb-4 ${
+                  tasksForSelectedDate.length > 5 ? "max-h-60" : "max-h-[50vh]"
+                }`}
+              >
+                {tasksForSelectedDate.length > 0 ? (
+                  <ul className="space-y-2">
+                    {tasksForSelectedDate.map((task) => (
+                      <TaskItem
+                        key={task.id}
+                        task={task}
+                        onEdit={handleEditTask}
+                        onDelete={handleDeleteTask}
+                      />
+                    ))}
+                  </ul>
                 ) : (
-                  <p>No tasks for this date.</p>
+                  <p className="text-gray-500 text-center mt-4">
+                    No tasks for this date.
+                  </p>
                 )}
               </div>
+
+              {/* Floating Add Task Button */}
+              <div className="fixed bottom-6 right-6 flex justify-end z-50">
+                <button
+                  onClick={() => setShowAddForm((prev) => !prev)}
+                  className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
+                >
+                  {showAddForm ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-6 h-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  ) : (
+                    <Plus className="w-6 h-6" />
+                  )}
+                </button>
+              </div>
+
+              {/* Add/Edit Task Form */}
+              {showAddForm && (
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  <h3 className="text-lg text-black font-semibold mb-2">
+                    {isEditing ? "Edit Task" : "Add New Task"}
+                  </h3>
+
+                  <input
+                    type="text"
+                    value={newTaskTitle}
+                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                    placeholder="Task Title"
+                    className="w-full border text-black border-purple-300 rounded-lg px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  />
+
+                  <CustomTimePicker
+                    hour={newTaskHour}
+                    minute={newTaskMinute}
+                    ampm={newTaskAmPm}
+                    onChange={(h, m, a) => {
+                      setNewTaskHour(h);
+                      setNewTaskMinute(m);
+                      setNewTaskAmPm(a);
+                    }}
+                  />
+
+                  <input
+                    type="text"
+                    value={newTaskDescription}
+                    onChange={(e) => setNewTaskDescription(e.target.value)}
+                    placeholder="Description"
+                    className="w-full text-black border border-purple-300 rounded-lg px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  />
+
+                  <button
+                    onClick={handleAddOrEditTask}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white px-4 py-2 rounded-lg hover:opacity-90 active:scale-95 transition"
+                  >
+                    {isEditing ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                    <span className=" ">{isEditing ? "Save Task" : "Add Task"}</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
+        </Layout>
+      ) : (
+        <div className="flex items-center bg-gradient-to-r from-purple-700 via-pink-600 to-red-600 justify-center h-screen">
+          <p className="text-lg sm:text-2xl font-bold text-white animate-pulse">Buddy...</p>
+        </div>
+      )}
+    </>
+  );
+}
+
+// TaskItem component with delete confirm logic
+function TaskItem({ task, onEdit, onDelete }: { task: Task; onEdit: (task: Task) => void; onDelete: (id: string) => void }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  return (
+    <li className="flex justify-between items-center bg-purple-50 p-2 rounded-lg">
+      <div>
+        <p className="font-semibold text-gray-800">{task.title}</p>
+        <p className="text-sm text-gray-600">{task.time} | {task.description}</p>
+      </div>
+
+      <div className="flex gap-2">
+        {/* Edit */}
+        {!confirmDelete && <button
+  onClick={() => onEdit(task)}
+  className="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-full flex items-center justify-center"
+>
+  <Edit2 className="w-5 h-5" />
+</button>}
+
+
+        {/* Delete / Confirm */}
+        {!confirmDelete ? (
+          <button
+  onClick={() => setConfirmDelete(true)}
+  className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full flex items-center justify-center"
+>
+  <Trash2 className="w-5 h-5" />
+</button>
+
+        ) : (
+          <>
+            {/* Confirm */}
+            <button
+              onClick={() => onDelete(task.id)}
+              className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-full flex items-center justify-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </button>
+
+            {/* Cancel */}
+            <button
+              onClick={() => setConfirmDelete(false)}
+              className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full flex items-center justify-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </>
         )}
       </div>
-    </Layout>:<div className="flex items-center bg-black justify-center h-screen">
-  <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-green-400 to-purple-500 animate-pulse">
-    Buddy...
-  </p>
-</div>
-}
-    </>
+    </li>
   );
 }

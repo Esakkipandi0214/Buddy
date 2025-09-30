@@ -7,12 +7,12 @@ import { getFirestore } from "firebase/firestore";
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDWPTdLaa-2dkSVN03ly7QIpnPMjEtQknY",
+  apiKey: `${process.env.NEXT_PUBLIC_FIREBASE_APIKEY}`,
   authDomain: "mytestapp-5dbf9.firebaseapp.com",
   projectId: "mytestapp-5dbf9",
   storageBucket: "mytestapp-5dbf9.appspot.com",
   messagingSenderId: "34451073992",
-  appId: "1:34451073992:web:3a4b01cd683167ba8feefd"
+  appId: `${process.env.NEXT_PUBLIC_FIREBASE_APIID}`
 };
 
 // Initialize Firebase

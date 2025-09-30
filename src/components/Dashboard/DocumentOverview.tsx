@@ -85,21 +85,32 @@ const DocumentOverview: React.FC = () => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold">Document Overview</CardTitle>
+     <Card className="bg-gradient-to-br from-white/90 to-white/70 backdrop-blur-lg border border-white/30 shadow-2xl rounded-3xl transition-all duration-300 hover:shadow-[0_10px_30px_rgba(139,92,246,0.3)] hover:scale-[1.01]">
+      <CardHeader className="pb-4 border-b border-purple-200">
+        <CardTitle className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-purple-600 via-pink-500 to-yellow-400 text-transparent bg-clip-text">
+          Document Overview
+        </CardTitle>
       </CardHeader>
-      <CardContent>
+
+      <CardContent className="mt-4">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-          <div className="col-span-2 sm:col-span-3 md:col-span-5 flex items-center justify-center p-4 bg-primary text-primary-foreground rounded-lg shadow">
+          {/* Total Documents */}
+          <div className="col-span-2 sm:col-span-3 md:col-span-5 flex items-center justify-center p-4 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 text-white rounded-xl shadow-lg hover:scale-105 transition-transform duration-200">
             <Files className="h-6 w-6 mr-2" />
-            <span className="text-lg font-semibold">Total Documents: {totalDocuments}</span>
+            <span className="text-lg sm:text-xl font-bold">
+              Total Documents: {totalDocuments}
+            </span>
           </div>
+
+          {/* Document Type Counts */}
           {Object.entries(documentCounts).map(([type, count]) => (
-            <div key={type} className="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow">
-              {getFileIcon(type)}
-              <span className="mt-2 text-lg font-semibold">{count}</span>
-              <span className="text-sm text-gray-500 capitalize">{type}</span>
+            <div
+              key={type}
+              className="flex flex-col items-center justify-center p-4 bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+            >
+              <div className="text-purple-600">{getFileIcon(type)}</div>
+              <span className="mt-2 text-lg sm:text-xl font-bold text-purple-800">{count}</span>
+              <span className="text-sm sm:text-base text-gray-600 capitalize">{type}</span>
             </div>
           ))}
         </div>

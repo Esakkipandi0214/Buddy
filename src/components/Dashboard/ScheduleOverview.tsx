@@ -62,29 +62,48 @@ const ScheduleOverview: React.FC = () => {
   if (error) return <div>{error}</div>;
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-2xl font-bold">Today&apos;s Schedule</CardTitle>
-        <Badge variant="outline" className="flex items-center">
+    <Card className="bg-gradient-to-br from-white/90 to-white/70 backdrop-blur-lg border border-white/30 shadow-2xl rounded-3xl transition-all duration-300 hover:shadow-[0_10px_30px_rgba(139,92,246,0.3)] hover:scale-[1.01]">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-purple-200">
+        <CardTitle className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-purple-600 via-pink-500 to-yellow-400 text-transparent bg-clip-text">
+          Today&apos;s Schedule
+        </CardTitle>
+
+        <Badge
+          variant="outline"
+          className="mt-2 sm:mt-0 flex items-center bg-gradient-to-r from-purple-600/20 to-pink-500/20 text-purple-800 border-purple-400 rounded-full px-3 py-1 text-sm"
+        >
           <CalendarIcon className="mr-1 h-4 w-4" />
           {currentDate}
         </Badge>
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[300px] pr-4">
+
+      <CardContent className="mt-2">
+        <ScrollArea className="h-[320px] pr-4">
           {schedules.length === 0 ? (
-            <div className="text-center text-gray-500 py-4">No tasks scheduled</div>
+            <div className="flex flex-col items-center justify-center text-center py-12 space-y-3">
+              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center shadow-md">
+                <Clock className="h-8 w-8 text-purple-600" />
+              </div>
+              <p className="text-lg font-semibold text-purple-700">No tasks scheduled today</p>
+              <p className="text-sm text-gray-500">You’re all caught up — enjoy your day! 🌞</p>
+            </div>
           ) : (
             schedules.map((event) => (
-              <div key={event.time} className="mb-4 last:mb-0">
-                <div className="flex items-center space-x-4">
-                  <Badge variant="secondary" className="flex items-center">
+              <div
+                key={event.time}
+                className="mb-4 last:mb-0 p-4 rounded-2xl bg-white/70 shadow-inner hover:bg-white hover:shadow-md transition-all duration-300"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
+                  <Badge
+                    variant="secondary"
+                    className="flex items-center bg-purple-600 text-white px-3 py-1 rounded-full text-sm shadow-sm"
+                  >
                     <Clock className="mr-1 h-4 w-4" />
                     {event.time}
                   </Badge>
                   <div>
-                    <h3 className="text-lg font-semibold">{event.title}</h3>
-                    <p className="text-sm text-gray-500">{event.description}</p>
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-800">{event.title}</h3>
+                    <p className="text-sm text-gray-600">{event.description}</p>
                   </div>
                 </div>
               </div>

@@ -4,10 +4,14 @@ import DocumentOverview from './DocumentOverview';
 
 const ScheduleAndDocumentOverview: React.FC = () => {
   return (
-    <div className="min-h-screen bg-[#e5989b] p-4 sm:p-6 lg:p-8">
-      <div className="max-w-3xl mx-auto space-y-6">
-        <ScheduleOverview />
-        <DocumentOverview />
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-700 to-red-600 p-4 sm:p-6 lg:p-10">
+    
+
+        {/* Sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ScheduleOverview />
+
+            <DocumentOverview />
       </div>
     </div>
   );
