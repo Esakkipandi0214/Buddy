@@ -175,9 +175,6 @@ export default function Calendar() {
             >
               {/* Header */}
               <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
-                <h2 className="text-xl font-bold text-purple-700 text-center sm:text-left">
-                  Tasks for {selectedDate.toDateString()}
-                </h2>
                 <button
                   onClick={() => {
                     setIsDrawerOpen(false);
@@ -194,37 +191,10 @@ export default function Calendar() {
                 >
                   &times;
                 </button>
-              </div>
-
-              {/* Task List */}
-              <div
-                className={`overflow-y-auto mb-4 ${
-                  tasksForSelectedDate.length > 5 ? "max-h-60" : "max-h-[50vh]"
-                }`}
-              >
-                {tasksForSelectedDate.length > 0 ? (
-                  <ul className="space-y-2">
-                    {tasksForSelectedDate.map((task) => (
-                      <TaskItem
-                        key={task.id}
-                        task={task}
-                        onEdit={handleEditTask}
-                        onDelete={handleDeleteTask}
-                      />
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-500 text-center mt-4">
-                    No tasks for this date.
-                  </p>
-                )}
-              </div>
-
-              {/* Floating Add Task Button */}
-              <div className="fixed bottom-6 md:bottom-32 lg:bottom-14 right-6 flex justify-end z-50">
+                  <div className=" flex justify-end z-50">
                 <button
                   onClick={() => setShowAddForm((prev) => !prev)}
-                  className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
                 >
                   {showAddForm ? (
                     <svg
@@ -246,10 +216,43 @@ export default function Calendar() {
                   )}
                 </button>
               </div>
+              </div>
+               <div className="flex justify-start items-center mb-4 border-b border-gray-200 pb-2">
+                <h2 className="text-xl font-bold text-purple-700 text-center sm:text-left">
+                  Tasks for {selectedDate.toDateString()}
+                </h2>
+              </div>
+
+              {/* Task List */}
+              {!showAddForm && <div
+                className={`overflow-y-auto mb-4 ${
+                  tasksForSelectedDate.length > 5 ? "max-h-60" : "max-h-[50vh]"
+                }`}
+              >
+                {(tasksForSelectedDate.length > 0) ? (
+                  <ul className="space-y-2">
+                    {tasksForSelectedDate.map((task) => (
+                      <TaskItem
+                        key={task.id}
+                        task={task}
+                        onEdit={handleEditTask}
+                        onDelete={handleDeleteTask}
+                      />
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500 text-center mt-4">
+                    No tasks for this date.
+                  </p>
+                )}
+              </div>}
+
+              {/* Floating Add Task Button */}
+           
 
               {/* Add/Edit Task Form */}
               {showAddForm && (
-                <div className="border-t border-gray-200 pt-4 mt-4">
+                <div className=" pt-1">
                   <h3 className="text-lg text-black font-semibold mb-2">
                     {isEditing ? "Edit Task" : "Add New Task"}
                   </h3>
