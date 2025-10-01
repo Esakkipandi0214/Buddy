@@ -35,7 +35,7 @@ export default function QRPage() {
       <a
         href={fileData.url}
         download
-        className="mt-6 px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+        className="mt-6 px-3 py-1 md:px-6 md:py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
       >
         Download File
       </a>

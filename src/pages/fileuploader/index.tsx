@@ -330,15 +330,15 @@ export default function FilesPage() {
         <Layout>
           {/* Confirmation Modal */}
 
-          <div className="container mx-auto p-4">
-            <h1 className="text-3xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-500 to-yellow-400">
+          <div className="container mx-auto p-3 md:p-4">
+            <h1 className=" text- lg:text-3xl font-extrabold mb-3 md:mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-500 to-yellow-400">
               File Upload & Search
             </h1>
 
             {/* Upload Button */}
             <button
               onClick={() => setShowUploadModal(true)}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg mb-6 hover:opacity-90 transition"
+              className="bg-indigo-600 text-sm lg:text-lg text-white px-2 lg:px-4 py-2 rounded-lg mb-3 lg:mb-6 hover:opacity-90 transition"
             >
               Upload New File
             </button>
@@ -397,13 +397,13 @@ export default function FilesPage() {
             )}
 
             {/* Search */}
-            <div className="mb-6 w-full lg:w-2/5 relative">
+            <div className=" mb-3 md:mb-6 w-full md:w-2/5 relative">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
                 placeholder="Type to search..."
-                className="w-full text-black rounded-xl border-2 border-indigo-300 py-3 px-4 pr-14 shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full text-black rounded-xl border-2 border-indigo-300 py-2 md:py-3 px-3 md:px-4 pr-14 shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
               <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg">
                 🔍

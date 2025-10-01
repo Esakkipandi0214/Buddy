@@ -46,12 +46,12 @@ const FileList: React.FC<FileListProps> = ({ files, handleDeleteClick }) => {
 
   return (
     <Suspense fallback={<Loader />}>
-      <ul className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4">
+      <ul className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-2 md:gap-4">
         {files?.length > 0 ? (
           files.map(file => (
             <li
               key={file.url}
-              className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-white rounded-2xl shadow hover:shadow-lg transition-all duration-300"
+              className="flex flex-col justify-start items-start lg:gap-2 p-4 bg-white rounded-2xl shadow hover:shadow-lg transition-all duration-300"
             >
               <div className="flex-1">
                 <p className="text-purple-700 font-medium break-words">{file.originalName}</p>
@@ -62,7 +62,7 @@ const FileList: React.FC<FileListProps> = ({ files, handleDeleteClick }) => {
                 </p>
               </div>
 
-              <div className="flex gap-2 sm:gap-4 mt-2 sm:mt-0 flex-wrap">
+              <div className="flex justify-start lg:justify-center  w-full lg:w-auto gap-2 pt-1 sm:gap-4 mt-2 sm:mt-0 flex-wrap">
                 {confirmDownloadUrl === file.url ? (
                   <>
                     <button
@@ -98,19 +98,19 @@ const FileList: React.FC<FileListProps> = ({ files, handleDeleteClick }) => {
                   <>
                     <button
                       onClick={() => setConfirmDownloadUrl(file.url)}
-                      className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+                      className="bg-indigo-600 text-white px-2 py-1 md:px-4 md:py-2  rounded-lg hover:opacity-90 transition"
                     >
                       Download
                     </button>
                     <button
                       onClick={() => handleDeleteClick(file)}
-                      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+                      className="bg-red-500 text-white px-2 py-1 md:px-4 md:py-2  rounded-lg hover:opacity-90 transition"
                     >
                       Delete
                     </button>
                     <button
                       onClick={() => setQrFile(file)}
-                      className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+                      className="bg-purple-600 text-white px-2 py-1 md:px-4 md:py-2 rounded-lg hover:opacity-90 transition"
                     >
                       QR
                     </button>
@@ -120,7 +120,7 @@ const FileList: React.FC<FileListProps> = ({ files, handleDeleteClick }) => {
             </li>
           ))
         ) : (
-          <li className="col-span-full px-4 py-6 text-center text-gray-500 bg-gray-50 rounded-2xl shadow">
+          <li className="col-span-full px-2 md:px-4 py-3 md:py-6 text-center text-gray-500 bg-gray-50 rounded-2xl shadow">
             No matching files found
           </li>
         )}
@@ -129,17 +129,24 @@ const FileList: React.FC<FileListProps> = ({ files, handleDeleteClick }) => {
       {/* QR Modal */}
       {qrFile && origin && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
+          <div className="bg-white p-10 md:p-6 rounded-2xl shadow-lg flex flex-col items-center">
             <h2 className="text-lg text-black font-bold mb-4">{qrFile.originalName} QR</h2>
             <QRCodeCanvas
               id={`qr-${qrFile.docId}`}
               value={`${origin}/File-shared-download?fileId=${qrFile.docId}`}
-              size={200}
+              size={250}
+              className=' flex md:hidden'
             />
-            <div className="mt-4 flex gap-4">
+            <QRCodeCanvas
+              id={`qr-${qrFile.docId}`}
+              value={`${origin}/File-shared-download?fileId=${qrFile.docId}`}
+              size={200}
+              className=' hidden md:flex'
+            />
+            <div className=" mt-9 md:mt-4 flex gap-4">
               <button
                 onClick={() => setQrFile(null)}
-                className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500"
+                className="bg-gray-400 text-white px-5 text-lg md:text-3xl py-2 md:px-4 md:py-2 rounded-lg hover:bg-gray-500"
               >
                 Close
               </button>

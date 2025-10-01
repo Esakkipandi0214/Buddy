@@ -151,8 +151,8 @@ export default function Calendar() {
     <>
       {access ? (
         <Layout>
-          <div className="container mx-auto p-4">
-            <h1 className="text-3xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-500 to-red-500">
+          <div className="container mx-auto p-1  md:p-4 lg:p-4">
+            <h1 className=" text-lg lg:text-3xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-500 to-red-500">
               Calendar & Tasks
             </h1>
 
@@ -187,9 +187,22 @@ export default function Calendar() {
                     setNewTaskDescription("");
                     setShowAddForm(false);
                   }}
-                  className="text-white bg-gradient-to-r from-red-500 to-pink-600 px-3 py-1 rounded-lg hover:opacity-90 active:scale-95 transition"
+                  className="text-white bg-gradient-to-r from-red-500 to-pink-600 px-2 py-1 rounded-lg hover:opacity-90 active:scale-95 transition"
                 >
-                  &times;
+                   <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
                 </button>
                   <div className=" flex justify-end z-50">
                 <button
@@ -218,7 +231,7 @@ export default function Calendar() {
               </div>
               </div>
                <div className="flex justify-start items-center mb-4 border-b border-gray-200 pb-2">
-                <h2 className="text-xl font-bold text-purple-700 text-center sm:text-left">
+                <h2 className=" text-sm md:text-xl font-bold text-purple-700 text-center sm:text-left">
                   Tasks for {selectedDate.toDateString()}
                 </h2>
               </div>
@@ -253,7 +266,7 @@ export default function Calendar() {
               {/* Add/Edit Task Form */}
               {showAddForm && (
                 <div className=" pt-1">
-                  <h3 className="text-lg text-black font-semibold mb-2">
+                  <h3 className=" text-sm md:text-lg text-black font-semibold mb-2">
                     {isEditing ? "Edit Task" : "Add New Task"}
                   </h3>
 
@@ -262,7 +275,7 @@ export default function Calendar() {
                     value={newTaskTitle}
                     onChange={(e) => setNewTaskTitle(e.target.value)}
                     placeholder="Task Title"
-                    className="w-full border text-black border-purple-300 rounded-lg px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    className="w-full border text-black border-purple-300 rounded-lg px-2 py-2 md:px-3 md:py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
                   />
 
                   <CustomTimePicker
@@ -281,7 +294,7 @@ export default function Calendar() {
                     value={newTaskDescription}
                     onChange={(e) => setNewTaskDescription(e.target.value)}
                     placeholder="Description"
-                    className="w-full text-black border border-purple-300 rounded-lg px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    className="w-full text-black border border-purple-300 rounded-lg px-2 py-2 md:px-3 md:py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
                   />
 
                   <button

@@ -111,7 +111,7 @@ const Header: React.FC<HeaderProps> = ({
           isOpen ? "translate-x-0" : "-translate-x-full"
         } lg:hidden`}
       >
-        <div className="p-6 space-y-6">
+        <div className="p-3 space-y-6">
           <div className="flex items-center gap-2 text-2xl font-bold">
             {/* <Home className="w-6 h-6" /> */}
              <span className="text-xl font-extrabold tracking-wide bg-gradient-to-r from-pink-400 to-yellow-300 text-transparent bg-clip-text">
@@ -124,7 +124,7 @@ const Header: React.FC<HeaderProps> = ({
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm font-medium"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition text-base font-medium"
               >
                 {link.icon}
                 {link.name}
@@ -132,10 +132,10 @@ const Header: React.FC<HeaderProps> = ({
             ))}
           </nav>
         </div>
-        <div className="p-6">
+        <div className=" p-3 md:p-6">
           <button
             onClick={handleLogout}
-            className="w-full py-2 rounded-lg bg-gradient-to-r from-red-600 to-pink-600 hover:opacity-90 transition text-sm font-semibold"
+            className=" w-full py-2 rounded-lg bg-gradient-to-r from-red-600 to-pink-600 hover:opacity-90 transition text-sm font-semibold"
           >
             Logout
           </button>
